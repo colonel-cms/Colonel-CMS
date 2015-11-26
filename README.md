@@ -83,20 +83,25 @@ The <a>Theme Builder</a> is resposible for compiling the source code, and the <a
 
 ## Theme Builder
 
-Themes in Colonel cms are compiled. They are compiled with a tool called the <a>Theme Builder</a>. The theme builder is a CLI tool that compiles your theme and makes sure to link the write header files etc.
+Themes in Colonel are compiled. They are compiled with a tool called the <a>Theme Builder</a>, a CLI tool that builds your theme for you.
 
 ## Project Structure
 
 ```
 theme/
-	controllers/   # Contains the controller for each page
-	templates/     # Contains templates. The default template provider uses [Stensil](https://github.com/kylef/Stencil)
-	lib/           # Contains any functionality besides theme
-	theme.json     # Contains information about this theme, author, requirements, etc.
-	settings.json  # Defined Theme Settings. Like `primary-color`, or somthing else
-	publication-type-{name}.json # Defines a type of publication.
-	widget-areas.json # Defines widgets area names
-	model.json        # Optional, defines database tables for this theme?
+    controllers/  # Contains the controller for each page
+    templates/    # Contains templates. The default template provider uses [Stensil](https://github.com/kylef/Stencil)
+    lib/          # Contains any functionality besides theme
+    assets/
+    |   images/
+    |       res/
+    |   script/    # JavaScript, if you want to use a preprosessor, the compiled code goes here
+    |   style/     # CSS, if you want to use a preprosessor, the compiled code goes here
+    theme.json    # Contains information about this theme, author, requirements, etc.
+    settings.json # Defined Theme Settings. Like `primary-color`, or somthing else
+    publication-{name}.json # Defines a type of publication.
+    widget-areas.json # Defines widgets area names
+    model.json        # Optional, defines database tables for this theme?
 ```
 
 <h6> settings.json </h6>
@@ -108,7 +113,7 @@ Example:
 [
 	{
 		"type"  : "text",
-		"title" : "Title",
+		"label" : "Title",
 		"description" : "The title displayed on the main page",
 		"name"  : "title",
 		"require" : true,
@@ -118,7 +123,7 @@ Example:
 	{
 		"type"  : "list",
 		"name"  : "front-page-slider",
-		"title" : "Front Page Slider",
+		"label" : "Front Page Slider",
 		"min"   : 1,
 		"description" : "Define the images in the front page slider",
 		"elements" : [
@@ -136,6 +141,49 @@ Example:
 ```
 
 The above is an example of a theme settings.json file.
+
+<h6> publication-{name}.json </h6>
+these file allow you to define a custom publication type. The pre built once are `Post` and `Page`.
+
+```js
+{
+	"label" : "video",
+	"elements" : [
+		"title", "content",
+		{
+			"type" : "url",
+			"name" : "video-url",
+			"label" : "Video Url"
+		}
+	]
+}
+```
+
+The above is an example of a publication type json file.<br>
+Inside "elements" you can use any `type` you can in settings, the only difference is, there are some new pre defined fields you can use.
+
+This publication type uses the pre defined `content` and `title` fields.
+
+<br>
+
+<h6> widget-areas.json </h6>
+
+The widget-areas.json file is optional, and defines the properties of widget areas in your theme. Here you define the area, and then you print the widgets that the user wants in that area in your template.
+
+```json
+{
+	"main-front" => {
+		"max" : 5,
+		"min" : 1,
+		"elements" : ["title"],
+	}
+}
+```
+
+Here we have defined a widget area called "Main front", it can hold up to 5 widgets, but at least one. And each widget added must get a title.
+
+In the elements, you can write any settings elemet you want. The only predefined element is "title".
+
 
 ## Writing a Provider
 
@@ -177,6 +225,32 @@ When that happens, the kernel invokes the Theme Provider, which handles calling 
 ### Assets Provider
 
 ### Template Provider
+
+### Setting Element
+
+You can write an extension that defines a custom settings element.
+
+Lets implement a tab view
+
+```swift
+class Tab extends SettingsElement {
+    public func init() {
+        parent(name:"youtube-url", fields:{
+            "tabs" : {
+                "type" : "object",
+                "key"  : "string",
+                // TODO
+            },
+        });
+    }
+    
+    public func elements() {
+        return [
+            // TODO
+        ];
+    }
+}
+```
 
 # Config File
 
